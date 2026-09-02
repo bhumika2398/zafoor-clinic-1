@@ -109,6 +109,17 @@ export const paymentMethodLabels: Record<string, string> = {
   NET_BANKING: "Net Banking",
   INSURANCE: "Insurance",
   ADVANCE: "Advance Balance",
+  OTHER: "Other",
+}
+
+export const patientPaymentStatusLabels: Record<string, string> = {
+  PENDING: "Pending",
+  PAID: "Paid",
+}
+
+export const patientPaymentStatusColors: Record<string, string> = {
+  PENDING: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+  PAID: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
 }
 
 export const refundStatusLabels: Record<string, string> = {

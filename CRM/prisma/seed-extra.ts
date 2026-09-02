@@ -230,6 +230,41 @@ async function main() {
   }
   console.log(`  ${billCount} bills and ${paymentCount} payments created`)
 
+  // ── Quick patient payments (Payments module — /payments) ───────────────
+  await withRetry(() => prisma.patientPayment.deleteMany({ where: { notes: { contains: "[seed-extra]" } } }))
+  const quickPaymentDefs: Array<{
+    patient: (typeof patients)[number]
+    appointment?: (typeof pastAppointments)[number]["appointment"]
+    amount: number
+    paymentMethod: string
+    status: "PENDING" | "PAID"
+    verified: boolean
+  }> = [
+    { patient: patients[0], appointment: pastAppointments[0]?.appointment, amount: 600, paymentMethod: "CASH", status: "PAID", verified: true },
+    { patient: patients[1], appointment: pastAppointments[1]?.appointment, amount: 450, paymentMethod: "UPI", status: "PAID", verified: true },
+    { patient: patients[2], amount: 500, paymentMethod: "CARD", status: "PENDING", verified: false },
+    { patient: patients[3], amount: 350, paymentMethod: "UPI", status: "PENDING", verified: false },
+    { patient: patients[4], amount: 700, paymentMethod: "OTHER", status: "PAID", verified: true },
+  ]
+  for (const def of quickPaymentDefs) {
+    await withRetry(() =>
+      prisma.patientPayment.create({
+        data: {
+          patientId: def.patient.id,
+          appointmentId: def.appointment?.id ?? null,
+          amount: def.amount,
+          paymentMethod: def.paymentMethod,
+          status: def.status,
+          notes: "[seed-extra] Front-desk quick payment log entry",
+          recordedById: receptionist.id,
+          verifiedById: def.verified ? doctor.id : null,
+          paidAt: def.status === "PAID" ? new Date() : null,
+        },
+      })
+    )
+  }
+  console.log(`  ${quickPaymentDefs.length} quick patient payments created (Payments module)`)
+
   // ── One refund request, for the Refunds queue ─────────────────────────
   const refundBillHolder = pastAppointments[0]
   await withRetry(() =>

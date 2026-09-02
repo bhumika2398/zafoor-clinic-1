@@ -26,6 +26,7 @@ export const ALL_AVAILABLE_TABS: TabItemDefinition[] = [
   { id: "audit_logs", href: "/audit-logs", label: "Audit Logs", group: "Clinical", description: "System security and staff activity logs" },
 
   // Billing & Finance
+  { id: "payments", href: "/payments", label: "Payments", group: "Billing & Finance", description: "Quick patient payment log with doctor/admin verification" },
   { id: "billing", href: "/billing", label: "Billing & Invoices", group: "Billing & Finance", description: "Create invoices, record payments, print receipts" },
   { id: "refunds", href: "/billing/refunds", label: "Refunds", group: "Billing & Finance", description: "Patient refund authorizations and ledger" },
   { id: "finance_dashboard", href: "/finance/dashboard", label: "Finance Dashboard", group: "Billing & Finance", description: "Revenue KPIs, payment method splits, P&L" },
@@ -138,6 +139,7 @@ export const DEFAULT_DOCTOR_PERMISSIONS: StaffPermissions = {
     "/calendar",
     "/templates",
     "/settings/signature",
+    "/payments",
   ],
   actionScopes: {
     canBookAppointments: true,
@@ -164,6 +166,7 @@ export const DEFAULT_RECEPTIONIST_PERMISSIONS: StaffPermissions = {
     "/follow-ups",
     "/communications",
     "/calendar",
+    "/payments",
   ],
   actionScopes: {
     canBookAppointments: true,

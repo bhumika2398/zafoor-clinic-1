@@ -20,6 +20,7 @@ import {
   AlertCircle,
   Wallet,
   BarChart3,
+  IndianRupee,
   Package,
   CalendarCheck2,
   Globe,
@@ -81,6 +82,7 @@ const navGroups: NavGroup[] = [
     dot: "bg-emerald-500",
     text: "text-emerald-600 dark:text-emerald-400",
     items: [
+      { href: "/payments", label: "Payments", icon: IndianRupee },
       { href: "/billing", label: "Billing", icon: Receipt },
       { href: "/billing/refunds", label: "Refunds", icon: Undo2 },
       { href: "/finance/dashboard", label: "Finance Dashboard", icon: TrendingUp },
