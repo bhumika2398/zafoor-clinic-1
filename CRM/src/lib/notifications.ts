@@ -57,9 +57,33 @@ export class NotificationService {
       }
 
       if (channel === "WHATSAPP") {
-        // WhatsApp Business API hook
-        console.log(`[Notification:WHATSAPP] Dispatched to ${payload.to.phone} | Msg: ${payload.message.slice(0, 60)}...`)
-        return { success: true, id: `wa_${Date.now()}` }
+        const token = process.env.WHATSAPP_ACCESS_TOKEN
+        const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID
+        const to = (payload.to.phone || "").replace(/[^\d]/g, "")
+
+        if (token && phoneId && to) {
+          // Meta WhatsApp Cloud API — https://developers.facebook.com/docs/whatsapp/cloud-api
+          const res = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+              messaging_product: "whatsapp",
+              to: to.startsWith("91") || to.length > 10 ? to : `91${to}`, // default India country code
+              type: "text",
+              text: { body: payload.message },
+            }),
+          })
+          const json = await res.json().catch(() => ({}))
+          if (!res.ok) {
+            console.error(`[Notification:WHATSAPP] API error:`, JSON.stringify(json))
+            return { success: false, id: json?.error?.message }
+          }
+          return { success: true, id: json?.messages?.[0]?.id || `wa_${Date.now()}` }
+        }
+
+        // No credentials configured yet — log so the flow is visible in dev.
+        console.log(`[Notification:WHATSAPP] (no WHATSAPP_ACCESS_TOKEN set) Would send to ${payload.to.phone}: ${payload.message.slice(0, 60)}...`)
+        return { success: true, id: `wa_mock_${Date.now()}` }
       }
 
       // Development / Mock fallback logger

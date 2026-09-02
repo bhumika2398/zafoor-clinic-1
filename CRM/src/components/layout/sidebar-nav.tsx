@@ -61,6 +61,7 @@ const navGroups: NavGroup[] = [
       { href: "/waiting-list", label: "Waiting List", icon: Clock },
       { href: "/follow-ups", label: "Follow-ups", icon: CheckSquare },
       { href: "/communications", label: "Communications", icon: MessageSquare },
+      { href: "/communications/whatsapp", label: "WhatsApp Bulk Messaging", icon: MessagesSquare },
     ],
   },
   {

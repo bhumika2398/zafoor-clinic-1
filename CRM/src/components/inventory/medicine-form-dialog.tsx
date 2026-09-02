@@ -122,19 +122,22 @@ export function MedicineFormDialog({ item, trigger }: MedicineFormDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={trigger ? (trigger as any) : undefined}>
-        {!trigger &&
-          (isEdit ? (
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <Pencil className="h-4 w-4 text-muted-foreground" />
-            </Button>
-          ) : (
-            <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" />
-              Add Medicine
-            </Button>
-          ))}
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          trigger
+            ? (trigger as any)
+            : isEdit ? (
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Pencil className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              ) : (
+                <Button size="sm" className="gap-1.5">
+                  <Plus className="h-4 w-4" />
+                  Add Medicine
+                </Button>
+              )
+        }
+      />
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>

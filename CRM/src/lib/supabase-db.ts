@@ -3,6 +3,10 @@ import { nanoid } from "nanoid"
 
 // Comprehensive Map of relational foreign keys for PostgREST joins
 const RELATION_MAP: Record<string, Record<string, string>> = {
+  User: {
+    doctorAvailabilities: "doctorAvailabilities:DoctorAvailability!DoctorAvailability_doctorId_fkey(*)",
+    doctorLeaves: "doctorLeaves:DoctorLeave!DoctorLeave_doctorId_fkey(*)",
+  },
   Appointment: {
     doctor: "doctor:User!Appointment_doctorId_fkey(*)",
     createdBy: "createdBy:User!Appointment_createdById_fkey(*)",
@@ -282,6 +286,29 @@ function applyOrder(query: any, orderBy?: any) {
   return query
 }
 
+// PostgREST returns timestamp columns as ISO strings, but the rest of the
+// codebase was written against Prisma's Date objects (e.g. `.getTime()`,
+// `date-fns` calls). Deep-walk every row and turn ISO-date-looking strings
+// back into real Date instances so callers don't have to know the difference.
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?$/
+
+function hydrateDates<T>(value: T): T {
+  if (value === null || value === undefined) return value
+  if (Array.isArray(value)) return value.map(hydrateDates) as any
+  if (typeof value === "string" && ISO_DATE_RE.test(value)) {
+    const d = new Date(value)
+    return (isNaN(d.getTime()) ? value : d) as any
+  }
+  if (typeof value === "object" && !(value instanceof Date)) {
+    const out: Record<string, any> = {}
+    for (const key of Object.keys(value as Record<string, any>)) {
+      out[key] = hydrateDates((value as Record<string, any>)[key])
+    }
+    return out as any
+  }
+  return value
+}
+
 function createModelDelegate(tableName: string) {
   return {
     async findUnique(args: { where: Record<string, any>; include?: any; select?: any }) {
@@ -293,7 +320,7 @@ function createModelDelegate(tableName: string) {
       if (error && error.code !== "PGRST116") {
         console.error(`[SupabaseDB ${tableName}.findUnique] error:`, JSON.stringify(error))
       }
-      return data
+      return hydrateDates(data)
     },
 
     async findFirst(args?: { where?: Record<string, any>; include?: any; select?: any; orderBy?: any }) {
@@ -306,7 +333,7 @@ function createModelDelegate(tableName: string) {
       if (error && error.code !== "PGRST116") {
         console.error(`[SupabaseDB ${tableName}.findFirst] error:`, JSON.stringify(error))
       }
-      return data
+      return hydrateDates(data)
     },
 
     async findMany(args?: {
@@ -334,7 +361,7 @@ function createModelDelegate(tableName: string) {
         // Non-blocking fallback for missing relations
         return []
       }
-      return data || []
+      return hydrateDates(data || [])
     },
 
     async create(args: { data: Record<string, any>; include?: any; select?: any }) {
@@ -349,7 +376,7 @@ function createModelDelegate(tableName: string) {
         console.error(`[SupabaseDB ${tableName}.create] error:`, JSON.stringify(error))
         throw new Error(error.message)
       }
-      return data
+      return hydrateDates(data)
     },
 
     async createMany(args: { data: Record<string, any>[] }) {
@@ -376,7 +403,7 @@ function createModelDelegate(tableName: string) {
         console.error(`[SupabaseDB ${tableName}.update] error:`, JSON.stringify(error))
         throw new Error(error.message)
       }
-      return data
+      return hydrateDates(data)
     },
 
     async updateMany(args: { where?: Record<string, any>; data: Record<string, any> }) {
@@ -401,7 +428,7 @@ function createModelDelegate(tableName: string) {
         console.error(`[SupabaseDB ${tableName}.delete] error:`, JSON.stringify(error))
         throw new Error(error.message)
       }
-      return data
+      return hydrateDates(data)
     },
 
     async deleteMany(args?: { where?: Record<string, any> }) {
@@ -594,6 +621,7 @@ const tables = [
   "Diagnosis",
   "LabResultItem",
   "Feedback",
+  "WhatsAppTemplate",
 ]
 
 export const db: Record<string, any> = {

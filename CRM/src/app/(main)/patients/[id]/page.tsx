@@ -109,6 +109,8 @@ export default async function PatientProfilePage({
           <PrescriptionsTab
             patientName={fullName}
             uhid={patient.uhid}
+            dob={patient.dob}
+            gender={patient.gender}
             prescriptions={prescriptions}
           />
         </TabsContent>

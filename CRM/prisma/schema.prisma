@@ -1338,3 +1338,17 @@ model AuditLog {
   @@index([timestamp])
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// WhatsApp bulk messaging (Meta WhatsApp Cloud API)
+// ─────────────────────────────────────────────────────────────────────────
+
+model WhatsAppTemplate {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  category  String   @default("General")
+  // Supports {{firstName}}, {{clinicName}}, {{clinicPhone}} placeholders
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

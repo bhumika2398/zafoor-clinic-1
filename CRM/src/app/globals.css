@@ -131,5 +131,9 @@
   }
   html {
     @apply font-sans;
+    /* Base readability bump — scales every rem-based text-* utility up
+       ~19% (e.g. text-sm 14px -> 16.6px, text-xs 12px -> 14.25px) without
+       touching individual components. */
+    font-size: 131.25%;
   }
 }
